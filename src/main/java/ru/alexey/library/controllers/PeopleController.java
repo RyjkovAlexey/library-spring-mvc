@@ -10,6 +10,7 @@ import ru.alexey.library.models.Person;
 import ru.alexey.library.utils.PersonValidator;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/people")
@@ -24,7 +25,7 @@ public class PeopleController {
         this.validator = validator;
     }
 
-    @GetMapping
+    @GetMapping()
     public String index(Model model) {
         model.addAttribute("people", personDAO.findAll());
 
@@ -38,12 +39,31 @@ public class PeopleController {
         return "people/new";
     }
 
+    @PostMapping()
+    public String create(
+            @ModelAttribute("person")
+            @Valid Person person,
+            BindingResult bindingResult
+    ) {
+        validator.validate(person, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            return "/people/new";
+        }
+
+        personDAO.save(person);
+
+        return "redirect:/people";
+    }
+
     @GetMapping("/{id}/edit")
     public String edit(
             Model model,
             @PathVariable("id") int id
     ) {
-        model.addAttribute("person", personDAO.findById(id));
+        Optional<Person> person = personDAO.findById(id);
+
+        person.ifPresent(value -> model.addAttribute("person", value));
 
         return "people/edit";
     }
@@ -67,7 +87,7 @@ public class PeopleController {
 
     @PatchMapping("/{id}")
     public String update(
-            @ModelAttribute("Person")
+            @ModelAttribute("person")
             @Valid Person person,
             BindingResult bindingResult,
             @PathVariable("id") int id

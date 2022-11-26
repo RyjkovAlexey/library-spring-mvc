@@ -5,11 +5,11 @@ public class Person {
 
     private String name;
 
-    private String yearOfBirth;
+    private int yearOfBirth;
 
     public Person(){}
 
-    public Person(int id, String name, String yearOfBirth) {
+    public Person(int id, String name, int yearOfBirth) {
         this.id = id;
         this.name = name;
         this.yearOfBirth = yearOfBirth;
@@ -31,11 +31,11 @@ public class Person {
         this.name = name;
     }
 
-    public String getYearOfBirth() {
+    public int getYearOfBirth() {
         return yearOfBirth;
     }
 
-    public void setYearOfBirth(String yearOfBirth) {
+    public void setYearOfBirth(int yearOfBirth) {
         this.yearOfBirth = yearOfBirth;
     }
 }

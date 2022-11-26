@@ -1,10 +1,14 @@
 package ru.alexey.library.configuration;
 
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import java.util.EnumSet;
 
 public class MySpringMvcDispatcherServerInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
@@ -19,12 +23,13 @@ public class MySpringMvcDispatcherServerInitializer extends AbstractAnnotationCo
 
     @Override
     protected String[] getServletMappings() {
-        return new String[0];
+        return new String[]{"/"};
     }
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         super.onStartup(servletContext);
+        registerCharacterEncodingFilter(servletContext);
         registerHiddenFieldFilter(servletContext);
     }
 
@@ -32,5 +37,17 @@ public class MySpringMvcDispatcherServerInitializer extends AbstractAnnotationCo
         servletContext
                 .addFilter("hiddenHttpMethodFilter", new HiddenHttpMethodFilter())
                 .addMappingForUrlPatterns(null, true, "/*");
+    }
+
+
+    private void registerCharacterEncodingFilter(ServletContext aContext) {
+        EnumSet<DispatcherType> dispatcherTypes = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
+
+        CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
+        characterEncodingFilter.setEncoding("UTF-8");
+        characterEncodingFilter.setForceEncoding(true);
+
+        FilterRegistration.Dynamic characterEncoding = aContext.addFilter("characterEncoding", characterEncodingFilter);
+        characterEncoding.addMappingForUrlPatterns(dispatcherTypes, true, "/*");
     }
 }

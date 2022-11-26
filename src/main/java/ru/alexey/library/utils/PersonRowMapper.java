@@ -13,7 +13,7 @@ public class PersonRowMapper implements RowMapper<Person> {
 
         person.setId(rs.getInt("id"));
         person.setName(rs.getString("name"));
-        person.setYearOfBirth(rs.getString("year_of_birth"));
+        person.setYearOfBirth(rs.getInt("year_of_birth"));
 
         return person;
     }
