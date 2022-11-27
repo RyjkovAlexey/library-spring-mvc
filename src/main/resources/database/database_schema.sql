@@ -11,5 +11,5 @@ CREATE TABLE book
     name     VARCHAR UNIQUE NOT NULL,
     author   VARCHAR        NOT NULL,
     year     INT CHECK ( year > 0 ),
-    owner_id INT REFERENCES person (id) ON DELETE SET DEFAULT DEFAULT 0
+    owner_id INT            NULL REFERENCES person (id) ON DELETE SET NULL
 );

@@ -1,5 +1,7 @@
 package ru.alexey.library.models;
 
+import org.springframework.lang.Nullable;
+
 public class Book {
 
     private int id;
@@ -10,7 +12,7 @@ public class Book {
 
     private int year;
 
-    private int ownerId;
+    private Integer ownerId;
 
     public Book (){}
 
@@ -54,11 +56,11 @@ public class Book {
         this.year = year;
     }
 
-    public int getOwnerId() {
+    public Integer getOwnerId() {
         return ownerId;
     }
 
-    public void setOwnerId(int ownerId) {
+    public void setOwnerId(Integer ownerId) {
         this.ownerId = ownerId;
     }
 }

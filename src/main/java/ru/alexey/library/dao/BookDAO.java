@@ -5,7 +5,9 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.alexey.library.models.Book;
+import ru.alexey.library.models.BookWithOwner;
 import ru.alexey.library.utils.BookRowMapper;
+import ru.alexey.library.utils.BookWithOwnerMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,8 +40,8 @@ public class BookDAO implements Dao<Book> {
     @Override
     public void save(Book book) {
         jdbcTemplate.update(
-                "INSERT INTO book (name, author, year) VALUES (?,?,?)",
-                book.getName(), book.getAuthor(), book.getYear()
+                "INSERT INTO book (name, author, year, owner_id) VALUES (?,?,?,?)",
+                book.getName(), book.getAuthor(), book.getYear(), null
         );
     }
 
@@ -54,5 +56,16 @@ public class BookDAO implements Dao<Book> {
     @Override
     public void delete(int id) {
         jdbcTemplate.update("DELETE FROM book WHERE id=?", id);
+    }
+
+    public Optional<BookWithOwner> findByByIdWithOwner(int id) {
+        return jdbcTemplate.query(
+                "SELECT " +
+                        "book.id bookid, book.name bookname, book.author, book.year, book.owner_id, " +
+                        "p.id personid, p.name personname, p.year_of_birth " +
+                        "FROM book LEFT JOIN person p ON book.owner_id = p.id WHERE book.id = ?",
+                new BookWithOwnerMapper(),
+                new Object[]{id}
+        ).stream().findAny();
     }
 }
