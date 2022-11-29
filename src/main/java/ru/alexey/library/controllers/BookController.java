@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.alexey.library.dao.BookDAO;
 import ru.alexey.library.dao.PersonDAO;
 import ru.alexey.library.models.Book;
-import ru.alexey.library.models.BookWithOwner;
 import ru.alexey.library.models.Person;
 
 import javax.validation.Valid;
@@ -22,9 +21,9 @@ public class BookController {
     private final PersonDAO personDAO;
 
     @Autowired
-    public BookController(BookDAO bookDAO, PersonDAO personDAO, PersonDAO personDAO1) {
+    public BookController(BookDAO bookDAO, PersonDAO personDAO) {
         this.bookDAO = bookDAO;
-        this.personDAO = personDAO1;
+        this.personDAO = personDAO;
     }
 
     @GetMapping()
@@ -35,9 +34,7 @@ public class BookController {
     }
 
     @GetMapping("/new")
-    public String newBook(Model model) {
-        model.addAttribute("book", new Book());
-
+    public String newBook(@ModelAttribute("book") Book book) {
         return "books/new";
     }
 
@@ -59,46 +56,61 @@ public class BookController {
     @GetMapping("/{id}")
     public String show(
             Model model,
-            @PathVariable("id") int id
+            @PathVariable("id") int id,
+            @ModelAttribute("person") Person person
     ) {
-        Optional<BookWithOwner> bookWithOwnerOptional = bookDAO.findByByIdWithOwner(id);
+        model.addAttribute("book", bookDAO.findById(id).get());
+        Optional<Person> bookOwner = bookDAO.getBookOwner(id);
 
-        BookWithOwner bookWithOwner = bookWithOwnerOptional.get();
-
-        Book book = bookWithOwner.getBook();
-        Optional<Person> person = bookWithOwner.getPerson();
-
-        model.addAttribute("book", book);
-        if (person.isPresent()) {
-            model.addAttribute("person", person.get());
+        if (bookOwner.isPresent()) {
+            model.addAttribute("owner", bookOwner.get());
         } else {
             model.addAttribute("people", personDAO.findAll());
-            model.addAttribute("person", new Person());
         }
 
         return "/books/show";
     }
 
-    @PatchMapping("/{id}/back")
-    public String back(
-            @PathVariable("id") int id
-    ) {
-        Book book = bookDAO.findById(id).get();
-        book.setOwnerId(null);
-        bookDAO.update(id, book);
-
-        return String.format("/{%s}", book.getId());
+    @GetMapping("/{id}/edit")
+    public String edit(Model model, @PathVariable("id") int id) {
+        model.addAttribute("book", bookDAO.findById(id).get());
+        return "books/edit";
     }
 
-    @PatchMapping("/{id}/give")
-    public String give(
-            @PathVariable("id") int id,
-            @ModelAttribute("book") Book book
+    @PatchMapping("/{id}")
+    public String update(
+            @ModelAttribute("book") @Valid Book book,
+            BindingResult bindingResult,
+            @PathVariable("id") int id
     ) {
-        book.setOwnerId(id);
+        if (bindingResult.hasErrors()) {
+            return "books/edit";
+        }
 
-        bookDAO.update(book.getId(), book);
+        bookDAO.update(id, book);
 
         return "redirect:/books";
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable("id") int id) {
+        bookDAO.delete(id);
+        return "redirect:/books";
+    }
+
+    @PatchMapping("/{id}/release")
+    public String release(@PathVariable("id") int id) {
+        bookDAO.release(id);
+
+        return "redirect:/books/" + id;
+    }
+
+    @PatchMapping("/{id}/assign")
+    public String assign(
+            @PathVariable("id") int id,
+            @ModelAttribute("person") Person selectedPerson
+    ) {
+        bookDAO.assign(id, selectedPerson);
+        return "redirect:/books/" + id;
     }
 }

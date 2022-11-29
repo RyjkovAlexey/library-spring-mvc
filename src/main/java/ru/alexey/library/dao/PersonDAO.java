@@ -3,7 +3,9 @@ package ru.alexey.library.dao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.alexey.library.models.Book;
 import ru.alexey.library.models.Person;
+import ru.alexey.library.utils.BookRowMapper;
 import ru.alexey.library.utils.PersonRowMapper;
 
 import java.util.List;
@@ -61,5 +63,13 @@ public class PersonDAO implements Dao<Person> {
                 )
                 .stream()
                 .findAny();
+    }
+
+    public List<Book> getBooksByPersonId(int id) {
+        return jdbcTemplate.query(
+                "SELECT * FROM book WHERE owner_id=?",
+                new BookRowMapper(),
+                new Object[]{id}
+        );
     }
 }

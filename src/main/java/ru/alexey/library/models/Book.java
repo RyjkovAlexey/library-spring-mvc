@@ -2,19 +2,31 @@ package ru.alexey.library.models;
 
 import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 public class Book {
 
     private int id;
 
+    @NotEmpty(message = "Имя не может быть пустым")
+    @Size(min = 2, max = 100, message = "Название книги не может быть короче двух и длиннее ста символов")
     private String name;
 
+    @NotEmpty(message = "Автор не может быть пустым")
+    @Size(min = 2, max = 100, message = "Имя автора не может быть короче двух и длиннее ста символов")
+    @Pattern(regexp = "[А-я]{2,100}", message = "Имя автора не может содерать цифр")
     private String author;
 
+    @Min(value = 1000, message = "Год выхода книги не может быть меньше 1000г")
     private int year;
 
     private Integer ownerId;
 
-    public Book (){}
+    public Book() {
+    }
 
     public Book(int id, String name, String author, int year, int ownerId) {
         this.id = id;

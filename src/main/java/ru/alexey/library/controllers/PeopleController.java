@@ -73,7 +73,8 @@ public class PeopleController {
             @PathVariable("id") int id,
             Model model
     ) {
-        personDAO.findById(id).ifPresent(value->model.addAttribute("person",value));
+        personDAO.findById(id).ifPresent(value -> model.addAttribute("person", value));
+        model.addAttribute("books", personDAO.getBooksByPersonId(id));
 
         return "people/show";
     }

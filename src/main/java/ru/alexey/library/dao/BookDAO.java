@@ -1,13 +1,12 @@
 package ru.alexey.library.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.alexey.library.models.Book;
-import ru.alexey.library.models.BookWithOwner;
+import ru.alexey.library.models.Person;
 import ru.alexey.library.utils.BookRowMapper;
-import ru.alexey.library.utils.BookWithOwnerMapper;
+import ru.alexey.library.utils.PersonRowMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,14 +57,19 @@ public class BookDAO implements Dao<Book> {
         jdbcTemplate.update("DELETE FROM book WHERE id=?", id);
     }
 
-    public Optional<BookWithOwner> findByByIdWithOwner(int id) {
+    public Optional<Person> getBookOwner(int id) {
         return jdbcTemplate.query(
-                "SELECT " +
-                        "book.id bookid, book.name bookname, book.author, book.year, book.owner_id, " +
-                        "p.id personid, p.name personname, p.year_of_birth " +
-                        "FROM book LEFT JOIN person p ON book.owner_id = p.id WHERE book.id = ?",
-                new BookWithOwnerMapper(),
+                "SELECT person.* FROM book JOIN person ON book.owner_id = person.id WHERE book.id=?",
+                new PersonRowMapper(),
                 new Object[]{id}
         ).stream().findAny();
+    }
+
+    public void release(int id) {
+        jdbcTemplate.update("UPDATE book SET owner_id=NULL WHERE id=?", id);
+    }
+
+    public void assign(int id, Person selectedPerson) {
+        jdbcTemplate.update("UPDATE book SET  owner_id=? WHERE id=?", selectedPerson.getId(), id);
     }
 }
